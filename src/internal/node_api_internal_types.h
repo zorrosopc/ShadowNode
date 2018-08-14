@@ -74,6 +74,7 @@ typedef struct {
   size_t argc;
   jerry_value_t* argv;
   jerry_value_t jval_this;
+  jerry_value_t jval_func;
 
   iotjs_function_info_t* function_info;
 } iotjs_callback_info_t;

@@ -28,6 +28,7 @@ static jerry_value_t iotjs_napi_function_handler(
   iotjs_function_info_t* function_info;
   jerry_get_object_native_pointer(function_obj, (void*)&function_info, NULL);
   iotjs_callback_info_t* callback_info = IOTJS_ALLOC(iotjs_callback_info_t);
+  callback_info->jval_func = function_obj;
   callback_info->argc = args_cnt;
   callback_info->argv = (jerry_value_t*)args_p;
   callback_info->jval_this = this_val;
@@ -142,6 +143,20 @@ napi_status napi_get_cb_info(napi_env env, napi_callback_info cbinfo,
     NAPI_ASSIGN(data, callback_info->function_info->data);
   }
 
+  NAPI_RETURN(napi_ok);
+}
+
+napi_status napi_get_new_target(napi_env env, napi_callback_info cbinfo,
+                                napi_value* result) {
+  iotjs_callback_info_t* callback_info = (iotjs_callback_info_t*)cbinfo;
+  jerry_value_t jval_this = callback_info->jval_this;
+  jerry_value_t jval_target = callback_info->jval_func;
+  bool is_instance = jerry_value_instanceof(jval_this, jval_target);
+  if (!is_instance) {
+    NAPI_ASSIGN(result, NULL);
+  } else {
+    NAPI_ASSIGN(result, AS_NAPI_VALUE(jval_target));
+  }
   NAPI_RETURN(napi_ok);
 }
 
