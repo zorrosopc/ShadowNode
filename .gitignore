@@ -44,7 +44,7 @@ TAGS
 # config files
 *.config
 !build.config
-！mipsel.config
+!mipsel.config
 
 .DS_Store
 */.DS_Store
