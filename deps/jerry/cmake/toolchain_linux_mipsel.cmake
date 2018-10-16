@@ -1,4 +1,4 @@
-# Copyright 2015-2016 Samsung Electronics Co., Ltd.
+# Copyright JS Foundation and other contributors, http://js.foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_SYSTEM_PROCESSOR mipsel)
+set(CMAKE_SYSTEM_NAME linux)
+set(CMAKE_SYSTEM_PROCESSOR mips)
 
 set(CMAKE_C_COMPILER ${CMAKE_TOOLCHAIN_ROOT}/mips-linux-gnu-gcc)

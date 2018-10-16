@@ -1,4 +1,4 @@
-# Copyright 2015-2016 Samsung Electronics Co., Ltd.
+# Copyright 2015-present Samsung Electronics Co., Ltd. and other contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,4 +15,6 @@
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR mipsel)
 
+set(CMAKE_SYSROOT ${CMAKE_EXTERNAL_SYSROOT})
 set(CMAKE_C_COMPILER ${CMAKE_TOOLCHAIN_ROOT}/mips-linux-gnu-gcc)
+set(CMAKE_C_COMPILER_WORKS TRUE)

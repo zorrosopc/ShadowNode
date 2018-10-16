@@ -403,6 +403,9 @@ iotjs_add_compile_flags(${IOTJS_MODULE_DEFINES})
 # find dbus-1
 find_package(PkgConfig)
 pkg_check_modules(DBUS dbus-1)
+# find ffi
+find_package(PkgConfig)
+pkg_check_modules(FFI ffi)
 
 file(GLOB IOTJS_HEADERS "${ROOT_DIR}/src/*.h")
 file(GLOB JERRY_HEADERS "${ROOT_DIR}/deps/jerry/jerry-core/include/*.h")
@@ -432,7 +435,7 @@ set_target_properties(${TARGET_LIB_IOTJS} PROPERTIES
   PUBLIC_HEADER "${IOTJS_PUBLIC_HEADERS}"
 )
 target_include_directories(${TARGET_LIB_IOTJS}
-  PRIVATE ${IOTJS_INCLUDE_DIRS} ${DBUS_INCLUDE_DIRS})
+  PRIVATE ${IOTJS_INCLUDE_DIRS} ${DBUS_INCLUDE_DIRS} ${FFI_INCLUDE_DIRS})
 target_link_libraries(${TARGET_LIB_IOTJS}
   ${CMAKE_DL_LIBS}
   ${JERRY_LIBS}
@@ -441,6 +444,7 @@ target_link_libraries(${TARGET_LIB_IOTJS}
   ${MBEDTLS_LIBS}
   ${MQTT_LIBS}
   ${DBUS_LIBRARY_DIRS}
+  ${FFI_LIBRARY_DIRS}
   ${EXTERNAL_LIBS}
 )
 

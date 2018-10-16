@@ -5,7 +5,7 @@
         "assert",
         "crypto",
         "child_process",
-        "dbus",
+	"dbus",
         "debug",
         "dns",
         "dgram",
@@ -26,7 +26,8 @@
         "querystring",
         "url",
         "websocket",
-        "zlib"
+        "zlib",
+        "ffi"
       ]
     },
     "iotjs_core_modules": {
@@ -456,6 +457,12 @@
       "js_file": "js/zlib.js",
       "native_files": ["modules/iotjs_module_zlib.c"],
       "init": "InitZlib"
+    },
+    "ffi": {
+      "js_file": "js/ffi.js",
+      "require": ["debug"],
+      "native_files": ["modules/iotjs_module_ffi.c","modules/ffi/callback_info.c","modules/ffi/ffi.c","modules/ffi/types.c"],
+      "init": "InitFFI"
     }
   }
 }
