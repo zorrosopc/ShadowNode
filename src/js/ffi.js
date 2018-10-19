@@ -3,7 +3,7 @@ ffi module
 */
 var ffi = exports;
 var bindings = native;
-var debug = require('debug')('ffi');
+var debug = console.log
 var assert = require('assert');
 
 /******************************************************************************************/
@@ -16,8 +16,9 @@ function isInteger(value) {
     Math.floor(value) === value
 }
 
+
 /******************************************************************************************/
-var Types = {
+var TypesIn = {
   'void *': {
     size: bindings.Constant.POINTER_SIZE
   },
@@ -96,7 +97,7 @@ var Types = {
 }
 
 function getSizeOf (type) {
-  var descriptor = Types[type]
+  var descriptor = TypesIn[type]
   if (descriptor == null) {
     throw new Error('Unknown type ' + type)
   }
@@ -106,6 +107,7 @@ function getSizeOf (type) {
 //module.exports.Types = Types;
 //module.exports.getSizeOf = getSizeOf;
 /******************************************************************************************/
+
 var castToCHandlers = {
   'double': checkNil(bindings.wrap_number_value),
   'int': checkNil(bindings.wrap_int_value),
@@ -253,12 +255,6 @@ function writeTo (type, ptr, offset, value) {
   return handler(ptr, offset, value)
 }
 
-//module.exports.castToCType = castToCType;
-//module.exports.castToCTypeFromArray = castToCTypeFromArray;
-//module.exports.castToJSType = castToJSType;
-//module.exports.castToJSTypeFromArray = castToJSTypeFromArray;
-//module.exports.writeTo = writeTo;
-
 /********************************************************************************************/
 function AStruct () {
 
@@ -271,7 +267,7 @@ function StructClassConstructor (members) {
   assert(Array.isArray(members))
   var keys = members.map(it => it[0])
   var types = members.map(it => it[1])
-  var typeSizes = types.map(definition.getSizeOf)
+  var typeSizes = types.map(getSizeOf)
   var alignment = Struct.alignment = typeSizes.reduce((accu, curr) => accu > curr ? accu : curr, 0)
   var size = Struct.size = typeSizes.reduce((accu, curr) => accu + (curr < alignment ? alignment : curr), 0)
   Struct.packed = false
@@ -322,7 +318,7 @@ function StructClassConstructor (members) {
   }
 }
 
-//module.exports = StructClassConstructor
+ffi.Struct = StructClassConstructor
 //module.exports.AStruct = AStruct
 /******************************************************************************************/
 /**
@@ -413,7 +409,7 @@ ffi.ForeignFunction = function (fnPtr, retType, argsTypes, abi) {
   var cif = new CIF(retType, argsTypes, abi)
   debug('ForeignFunction - cif')
   function proxy () {
-    debug('ForeignFunction - proxy')
+    debug('ForeignFunction - proxy - '+ typeof getSizeOf)
     var retPtr = bindings.alloc(getSizeOf(retType))
     var argsArr = castToCTypeFromArray(cif.argsTypes, arguments)
     var argsPtr = bindings.wrap_pointers.apply(null, [ cif.numOfArgs ].concat(argsArr))
@@ -437,7 +433,7 @@ ffi.ForeignFunction = function (fnPtr, retType, argsTypes, abi) {
     assert.strictEqual(typeof callback, 'function', 'expect a function as the last argument of async call')
 
     // Allocates appropriate memory block used in ffi call
-    var retPtr = bindings.alloc(Types.getSizeOf(retType))
+    var retPtr = bindings.alloc(getSizeOf(retType))
     var argsArr = castToCTypeFromArray(cif.argsTypes, Array.prototype.slice.call(arguments, 0, -1))
     var argsPtr = bindings.wrap_pointers.apply(null, [ cif.numOfArgs ].concat(argsArr))
 
@@ -532,7 +528,7 @@ DynamicLibrary.prototype.close = function () {
  * Get a symbol from this library, returns a Pointer for (memory address of) the symbol
  */
 DynamicLibrary.prototype.get = function (symbol) {
-  debug('dlsym()', symbol)
+  debug('dlsym()'+symbol)
   assert.equal('string', typeof symbol)
 
   var ptr = dlsym(this._handle, symbol)
@@ -580,7 +576,7 @@ var EXT = {
  * ForeignFunction.
  */
 ffi.Library = function(libfile, funcs, lib) {
-  debug('creating Library object for', libfile)
+  debug('creating Library object for'+libfile)
 
   if (libfile && libfile.indexOf(EXT) === -1) {
     debug('appending library extension to library name '+EXT)
@@ -618,9 +614,16 @@ ffi.Library = function(libfile, funcs, lib) {
 
 /******************************************************************************************/
 
-//module.exports.isPointerNull = bindings.is_pointer_null
-//module.exports.allocPointer = bindings.alloc_pointer
-//module.exports.alloc = bindings.alloc
-//module.exports.derefPointerPointer = bindings.deref_pointer_pointer
+ffi.isPointerNull = bindings.is_pointer_null
+ffi.allocPointer = bindings.alloc_pointer
+ffi.alloc = bindings.alloc
+ffi.derefPointerPointer = bindings.deref_pointer_pointer
 
+ffi.Types = {
+	castToCType : castToCType,
+	castToCTypeFromArray : castToCTypeFromArray,
+	castToJSType : castToJSType,
+	castToJSTypeFromArray : castToJSTypeFromArray,
+	writeTo : writeTo
+}
 

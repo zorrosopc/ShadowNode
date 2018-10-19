@@ -182,8 +182,13 @@ JS_FUNCTION(DerefStringPointer)
   byte *ptr = unwrap_ptr_from_jbuffer(JS_GET_ARG(0, object));
   int offset = (int)JS_GET_ARG_IF_EXIST_OR_DEFAULT(1, number, 0);
 
-  jerry_char_t **data_ptr = (jerry_char_t **)(ptr + offset);
-  jerry_char_t *str_ptr = *data_ptr;
+  //printf("DerefStringPointer offset:%d\r\n",offset);
+
+  jerry_char_t **data_ptr = (jerry_char_t **)(ptr);/// fixbug: (jerry_char_t **)(ptr+offset)
+  jerry_char_t *str_ptr = data_ptr[offset];/// fixbug: *data_ptr;
+  //printf("data_ptr:%s\r\n",data_ptr);
+  //printf("data_ptr+3:%s\r\n",data_ptr[offset]);
+  //printf("str_ptr:%s\r\n",str_ptr + offset);
   return jerry_create_string(str_ptr);
 }
 
