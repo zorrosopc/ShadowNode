@@ -128,6 +128,7 @@ var castToJsHandlers = {
   'double': bindings.deref_number_pointer,
   'int': bindings.deref_int_pointer,
   'string': bindings.deref_string_pointer,
+  'cstring': bindings.deref_string_value,
   'pointer': bindings.deref_pointer_pointer
 }
 

@@ -227,17 +227,37 @@ static void iotjs_uart_onread(jerry_value_t jthis, char* buf) {
   jerry_release_value(jemit);
 }
 
+void SDK_BCD2Str(unsigned char *bcd, unsigned char *str, int bcd_n)
+{
+	int i;
+
+	for(i=0;i<bcd_n;i++){
+		if((bcd[i]&0xF0)>=0xA0)
+			str[i*2]   = (bcd[i] >> 4) + 0x37;
+		else
+			str[i*2]   = (bcd[i] >> 4) + 0x30;
+
+		if((bcd[i]&0x0F)>=0x0A)
+			str[i*2+1] = (bcd[i] &0x0f) + 0x37;
+		else
+			str[i*2+1] = (bcd[i] &0x0f) + 0x30;
+	}
+}
+
 
 void iotjs_uart_read_cb(uv_poll_t* req, int status, int events) {
   iotjs_uart_t* uart = (iotjs_uart_t*)req->data;
   IOTJS_VALIDATED_STRUCT_METHOD(iotjs_uart_t, uart);
 
   char buf[UART_WRITE_BUFFER_SIZE];
+  char str[UART_WRITE_BUFFER_SIZE*2];
   int i = read(_this->device_fd, buf, UART_WRITE_BUFFER_SIZE - 1);
   if (i > 0) {
     buf[i] = '\0';
-    DDDLOG("%s - read data: %s", __func__, buf);
-    iotjs_uart_onread(_this->jemitter_this, buf);
+    memset(str,0,sizeof(str));
+    SDK_BCD2Str((unsigned char*)buf,(unsigned char*)str,i);
+    DDDLOG("%s - read data: %s", __func__, str);
+    iotjs_uart_onread(_this->jemitter_this, str);
   }
 }
 

@@ -183,6 +183,8 @@ JS_FUNCTION(DerefStringPointer)
   int offset = (int)JS_GET_ARG_IF_EXIST_OR_DEFAULT(1, number, 0);
 
   //printf("DerefStringPointer offset:%d\r\n",offset);
+  //printf("DerefStringPointer ptr:%s\r\n",ptr);
+
 
   jerry_char_t **data_ptr = (jerry_char_t **)(ptr);/// fixbug: (jerry_char_t **)(ptr+offset)
   jerry_char_t *str_ptr = data_ptr[offset];/// fixbug: *data_ptr;
@@ -191,6 +193,21 @@ JS_FUNCTION(DerefStringPointer)
   //printf("str_ptr:%s\r\n",str_ptr + offset);
   return jerry_create_string(str_ptr);
 }
+
+JS_FUNCTION(DerefStringValue)
+{
+  byte *ptr = unwrap_ptr_from_jbuffer(JS_GET_ARG(0, object));
+  int offset = (int)JS_GET_ARG_IF_EXIST_OR_DEFAULT(1, number, 0);
+
+  //printf("DerefStringValue offset:%d\r\n",offset);
+  //printf("DerefStringValue ptr:%s\r\n",ptr);
+
+
+  jerry_char_t *str_ptr = (jerry_char_t *)ptr;
+  //printf("str_ptr:%s\r\n",str_ptr);
+  return jerry_create_string(str_ptr);
+}
+
 
 /**
  * Write an double value to pointed location with an offset
@@ -334,6 +351,7 @@ void LibFFITypes(jerry_value_t exports)
   iotjs_jval_set_method(exports, "deref_string_pointer", DerefStringPointer);
   iotjs_jval_set_method(exports, "write_string_value", WriteStringValue);
 
+  iotjs_jval_set_method(exports, "deref_string_value", DerefStringValue);
   iotjs_jval_set_method(exports, "is_pointer_null", IsPointerNull);
 
   jerry_value_t jval_constant = jerry_create_object();

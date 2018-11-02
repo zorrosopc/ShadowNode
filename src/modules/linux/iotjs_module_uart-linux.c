@@ -118,6 +118,62 @@ void iotjs_uart_open_worker(uv_work_t* work_req) {
 }
 
 
+unsigned int SDK_Asc2Bcd(unsigned char *Dest,unsigned char *Src,unsigned int Len)
+{
+	unsigned int i;
+    unsigned char high = 0,low = 0;
+    unsigned int bcd_len = (Len+1)/2;
+    for(i = 0; i < Len; i++)
+    {
+        //待转bcd码高Nibble
+	    if((*(Src + i) >= 0x61) && (*(Src + i) <= 0x66))      //range a~f
+	    {
+	        high = *(Src + i) - 0x57;
+	    }
+	    else if((*(Src + i) >= 0x41) && (*(Src + i) <= 0x46))  //range A~F
+	    {
+	        high = *(Src + i) - 0x37;
+	    }
+	    else if((*(Src + i) >= 0x30) && (*(Src + i) <= 0x39))  //range 0~9
+	    {
+	        high = *(Src + i) - 0x30;
+	    }
+        else
+        {
+            high = 0x00 ;                                       //其他
+        }
+
+        //待转bcd码低Nibble
+        i++;
+        if(i < Len)
+        {
+	        if((*(Src + i) >= 0x61) && (*(Src + i) <= 0x66))    //range a~f
+	        {
+	            low = *(Src + i) - 0x57;
+            }
+            else if((*(Src + i) >= 0x41) && (*(Src + i) <= 0x46)) //range A~F
+            {
+                low = *(Src + i) - 0x37;
+	    	}
+	    	else if((*(Src + i) >= 0x30) && (*(Src + i) <= 0x39))  //range 0~9
+		    {
+		        low = *(Src + i) - 0x30;
+	        }
+	        else
+	        {
+	            low = 0x00 ;                                       //其他
+		    }
+	    }
+	    else
+	    {
+	        i--;                                                //预防255个时溢出出错
+	        low = 0x00 ;                                       //如果是奇数个末尾补0x00
+	    }
+        *(Dest + i/2) = (high << 4) | low;                      //合并BCD码
+    }
+	return (bcd_len);
+}
+
 bool iotjs_uart_write(iotjs_uart_t* uart) {
   IOTJS_VALIDATED_STRUCT_METHOD(iotjs_uart_t, uart);
   int bytesWritten = 0;
@@ -127,12 +183,16 @@ bool iotjs_uart_write(iotjs_uart_t* uart) {
 
   DDDLOG("%s - data: %s", __func__, buf_data);
 
+  char bcd[512]={0};
+  unsigned int buflen = _this->buf_len;
+  SDK_Asc2Bcd((unsigned char*)bcd,(unsigned char*)buf_data,buflen);
+
   do {
     errno = 0;
-    bytesWritten = write(fd, buf_data + offset, _this->buf_len - offset);
+    bytesWritten = write(fd, bcd + offset, buflen - offset);
     tcdrain(fd);
 
-    DDDLOG("%s - size: %d", __func__, _this->buf_len - offset);
+    DDDLOG("%s - size: %d", __func__, buflen - offset);
 
     if (bytesWritten != -1) {
       offset += (unsigned)bytesWritten;
@@ -145,7 +205,7 @@ bool iotjs_uart_write(iotjs_uart_t* uart) {
 
     return false;
 
-  } while (_this->buf_len > offset);
+  } while (buflen > offset);
 
   return true;
 }
